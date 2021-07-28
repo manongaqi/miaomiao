@@ -1,83 +1,13 @@
 <template>
     <div class="cinema_body">
 		<ul>
-			<li>
+			<li v-for="data in datalist" :key="data.cinemaId">
 				<div>
-					<span>大地影院(澳东世纪店)</span>
+					<span>{{data.name}}</span>
 					<span class="q"><span class="price">22.9</span> 元起</span>
 				</div>
 				<div class="address">
-					<span>金州区大连经济技术开发区澳东世纪3层</span>
-					<span>1763.5km</span>
-				</div>
-				<div class="card">
-        			<div>小吃</div>
-        			<div>折扣卡</div>
-    			</div>
-			</li>
-			<li>
-				<div>
-					<span>大地影院(澳东世纪店)</span>
-					<span class="q"><span class="price">22.9</span> 元起</span>
-				</div>
-				<div class="address">
-					<span>金州区大连经济技术开发区澳东世纪3层</span>
-					<span>1763.5km</span>
-				</div>
-				<div class="card">
-        			<div>小吃</div>
-        			<div>折扣卡</div>
-    			</div>
-			</li>
-			<li>
-				<div>
-					<span>大地影院(澳东世纪店)</span>
-					<span class="q"><span class="price">22.9</span> 元起</span>
-				</div>
-				<div class="address">
-					<span>金州区大连经济技术开发区澳东世纪3层</span>
-					<span>1763.5km</span>
-				</div>
-				<div class="card">
-        			<div>小吃</div>
-        			<div>折扣卡</div>
-    			</div>
-			</li>
-			<li>
-				<div>
-					<span>大地影院(澳东世纪店)</span>
-					<span class="q"><span class="price">22.9</span> 元起</span>
-				</div>
-				<div class="address">
-					<span>金州区大连经济技术开发区澳东世纪3层</span>
-					<span>1763.5km</span>
-				</div>
-				<div class="card">
-        			<div>小吃</div>
-        			<div>折扣卡</div>
-    			</div>
-			</li>
-			<li>
-				<div>
-					<span>大地影院(澳东世纪店)</span>
-					<span class="q"><span class="price">22.9</span> 元起</span>
-				</div>
-				<div class="address">
-					<span>金州区大连经济技术开发区澳东世纪3层</span>
-					<span>1763.5km</span>
-				</div>
-				<div class="card">
-        			<div>小吃</div>
-        			<div>折扣卡</div>
-    			</div>
-			</li>
-			<li>
-				<div>
-					<span>大地影院(澳东世纪店)</span>
-					<span class="q"><span class="price">22.9</span> 元起</span>
-				</div>
-				<div class="address">
-					<span>金州区大连经济技术开发区澳东世纪3层</span>
+					<span>{{data.address}}</span>
 					<span>1763.5km</span>
 				</div>
 				<div class="card">
@@ -90,8 +20,32 @@
 </template>
 
 <script>
+import axios from 'axios'
 export default {
-    name:'CiList'
+	name:'CiList',
+	data(){
+		return{
+			datalist:[],
+			prevCityId:-1
+		}
+	},
+	activated(){
+
+		var cityId = this.$store.state.city.cityId;
+		if(this.prevCityId === cityId){return;}
+		console.log(123)
+
+		axios({
+			url:`https://m.maizuo.com/gateway?cityId=${cityId}&ticketFlag=1&k=4997830`,
+			headers:{
+				'X-Client-Info': `{"a":"3000","ch":"1002","v":"5.0.4","e":"16263341444941200960258049","bc":"${cityId}"}`,
+				'X-Host': 'mall.film-ticket.cinema.list'
+			}
+		}).then((res)=>{
+			this.datalist = res.data.data.cinemas
+			this.prevCityId = cityId;
+		})
+	}
 }
 </script>
 

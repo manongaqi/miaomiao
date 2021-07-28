@@ -1,96 +1,13 @@
 <template>
     <div class="movie_body">
-		<ul>
-			<li>
-				<div class="pic_show"><img src="/images/movie_1.jpg"></div>
+		<ul v-infinite-scroll="loadMore" infinite-scroll-distance="10" infinite-scroll-disabled="loading"
+        infinite-scroll-immediate-check="false">
+			<li v-for="item in datalist" :key="item.filmId">
+				<div class="pic_show" @click="handleToDetail(item.filmId)"><img :src="item.poster"></div>
 				<div class="info_list">
-					<h2>无名之辈</h2>
+					<h2 @click="handleToDetail(item.filmId)">{{item.name}}</h2>
 					<p><span class="person">17746</span> 人想看</p>
-					<p>主演: 陈建斌,任素汐,潘斌龙</p>
-					<p>2018-11-30上映</p>
-				</div>
-				<div class="btn_pre">
-					预售
-				</div>
-			</li>
-			<li>
-				<div class="pic_show"><img src="/images/movie_2.jpg"></div>
-				<div class="info_list">
-					<h2>毒液：致命守护者</h2>
-					<p><span class="person">2346</span> 人想看</p>
-					<p>主演: 汤姆·哈迪,米歇尔·威廉姆斯,里兹·阿迈德</p>
-					<p>2018-11-30上映</p>
-				</div>
-				<div class="btn_pre">
-					预售
-				</div>
-			</li>
-			<li>
-				<div class="pic_show"><img src="/images/movie_1.jpg"></div>
-				<div class="info_list">
-					<h2>无名之辈</h2>
-					<p><span class="person">17746</span> 人想看</p>
-					<p>主演: 陈建斌,任素汐,潘斌龙</p>
-					<p>2018-11-30上映</p>
-				</div>
-				<div class="btn_pre">
-					预售
-				</div>
-			</li>
-			<li>
-				<div class="pic_show"><img src="/images/movie_2.jpg"></div>
-				<div class="info_list">
-					<h2>毒液：致命守护者</h2>
-					<p><span class="person">2346</span> 人想看</p>
-					<p>主演: 汤姆·哈迪,米歇尔·威廉姆斯,里兹·阿迈德</p>
-					<p>2018-11-30上映</p>
-				</div>
-				<div class="btn_pre">
-					预售
-				</div>
-			</li>
-			<li>
-				<div class="pic_show"><img src="/images/movie_1.jpg"></div>
-				<div class="info_list">
-					<h2>无名之辈</h2>
-					<p><span class="person">17746</span> 人想看</p>
-					<p>主演: 陈建斌,任素汐,潘斌龙</p>
-					<p>2018-11-30上映</p>
-				</div>
-				<div class="btn_pre">
-					预售
-				</div>
-			</li>
-			<li>
-				<div class="pic_show"><img src="/images/movie_2.jpg"></div>
-				<div class="info_list">
-					<h2>毒液：致命守护者</h2>
-					<p><span class="person">2346</span> 人想看</p>
-					<p>主演: 汤姆·哈迪,米歇尔·威廉姆斯,里兹·阿迈德</p>
-					<p>2018-11-30上映</p>
-				</div>
-				<div class="btn_pre">
-					预售
-				</div>
-			</li>
-			<li>
-				<div class="pic_show"><img src="/images/movie_1.jpg"></div>
-				<div class="info_list">
-					<h2>无名之辈</h2>
-					<p><span class="person">17746</span> 人想看</p>
-					<p>主演: 陈建斌,任素汐,潘斌龙</p>
-					<p>2018-11-30上映</p>
-				</div>
-				<div class="btn_pre">
-					预售
-				</div>
-			</li>
-			<li>
-				<div class="pic_show"><img src="/images/movie_2.jpg"></div>
-				<div class="info_list">
-					<h2>毒液：致命守护者</h2>
-					<p><span class="person">2346</span> 人想看</p>
-					<p>主演: 汤姆·哈迪,米歇尔·威廉姆斯,里兹·阿迈德</p>
+					<p>主演: {{item.actors | actorsName}}</p>
 					<p>2018-11-30上映</p>
 				</div>
 				<div class="btn_pre">
@@ -102,7 +19,57 @@
 </template>
 
 <script>
+import axios from 'axios'
+import Vue from 'vue'
+
+Vue.filter('actorsName',function(item){
+	var newActors = item.map(item=>item.name)
+	return newActors.join('  ')
+})
 export default {
+	name:'ComingSoon',
+	data(){
+		return{
+			datalist:[],
+			current:1,
+			prevCityId:-1
+		}
+	},
+	activated(){
+
+		var cityId = this.$store.state.city.cityId;
+		if(this.prevCityId === cityId){return;}
+		console.log(123)
+
+		axios({
+			url:`https://m.maizuo.com/gateway?cityId=${cityId}&pageNum=1&pageSize=10&type=2&k=7803030`,
+			headers:{
+				'X-Client-Info': `{"a":"3000","ch":"1002","v":"5.0.4","e":"16263341444941200960258049","bc":"${cityId}"}`,
+				'X-Host': 'mall.film-ticket.film.list'
+			}
+		}).then((res)=>{
+			this.datalist = res.data.data.films
+			this.prevCityId = cityId;
+		})
+	},
+	methods:{
+		loadMore(){
+			this.current++;
+
+			axios({
+				url:`https://m.maizuo.com/gateway?cityId=${cityId}&pageNum=${this.current}&pageSize=10&type=2&k=7803030`,
+				headers:{
+					'X-Client-Info': `{"a":"3000","ch":"1002","v":"5.0.4","e":"16263341444941200960258049","bc":"${cityId}"}`,
+					'X-Host': 'mall.film-ticket.film.list'
+				}
+			}).then((res)=>{
+				this.datalist = [...this.datalist,...res.data.data.films]
+			})
+		},
+		handleToDetail(movieId){
+			this.$router.push('/movie/detail/2/'+movieId)
+		}
+	},
 
 }
 </script>
